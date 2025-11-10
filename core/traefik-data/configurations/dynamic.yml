@@ -1,9 +1,5 @@
 http:
   middlewares:
-    user-auth:
-      basicAuth:
-        usersFile: /configurations/.htpasswd
-
     secureHeaders:
       headers:
         sslRedirect: true

@@ -55,12 +55,9 @@ services:
       - traefik.docker.network=${DOCKER_NETWORK:-proxy}
       - traefik.http.routers.portainer-secure.entrypoints=websecure
       - traefik.http.routers.portainer-secure.rule=Host(`${PORTAINER_DOMAIN}`)
-      - traefik.http.routers.portainer-secure.service=portainer
-      - traefik.http.services.portainer.loadbalancer.server.port=${PORTAINER_PORT:-9000}
-      - traefik.http.routers.portainer-secure.middlewares=user-auth@file
-      - traefik.http.routers.portainer-secure.tls=true
       - traefik.http.routers.portainer-secure.tls.certresolver=letsencrypt
-
+      - traefik.http.routers.portainer-secure.middlewares=user-auth
+      - traefik.http.services.portainer.loadbalancer.server.port=${PORTAINER_PORT:-9000}
 networks:
   proxy:
     external: true
