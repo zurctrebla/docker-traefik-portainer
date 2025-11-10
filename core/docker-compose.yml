@@ -23,20 +23,20 @@ services:
       - --certificatesresolvers.letsencrypt.acme.storage=/acme.json
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
     volumes:
-      - "/etc/localtime:/etc/localtime:ro"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik-data/traefik.yml:/traefik.yml:ro"
-      - "./traefik-data/acme.json:/acme.json"
-      - "./traefik-data/configurations:/configurations"
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik-data/traefik.yml:/traefik.yml:ro
+      - ./traefik-data/acme.json:/acme.json
+      - ./traefik-data/configurations:/configurations
     labels:
       - traefik.enable=true
-      - traefik.docker.network=${DOCKER_NETWORK:-proxy}
+      - traefik.docker.network=proxy
       - traefik.http.routers.traefik-secure.entrypoints=websecure
       - traefik.http.routers.traefik-secure.rule=Host(`${TRAEFIK_DOMAIN}`)
       - traefik.http.routers.traefik-secure.service=api@internal
-      - traefik.http.routers.traefik-secure.middlewares=user-auth@file
-      - traefik.http.routers.traefik-secure.tls=true
       - traefik.http.routers.traefik-secure.tls.certresolver=letsencrypt
+      - traefik.http.routers.traefik-secure.middlewares=user-auth
+      - traefik.http.middlewares.user-auth.basicauth.usersfile=${BASIC_AUTH_FILE}
 
   portainer:
     image: "portainer/portainer-ce:latest"
@@ -52,7 +52,7 @@ services:
       - "./portainer-data:/data"
     labels:
       - traefik.enable=true
-      - traefik.docker.network=${DOCKER_NETWORK:-proxy}
+      - traefik.docker.network=proxy
       - traefik.http.routers.portainer-secure.entrypoints=websecure
       - traefik.http.routers.portainer-secure.rule=Host(`${PORTAINER_DOMAIN}`)
       - traefik.http.routers.portainer-secure.tls.certresolver=letsencrypt
