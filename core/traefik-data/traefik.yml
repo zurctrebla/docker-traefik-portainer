@@ -23,3 +23,12 @@ providers:
     exposedByDefault: false
   file:
     filename: /configurations/dynamic.yml
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: ${LETSENCRYPT_EMAIL}
+      storage: acme.json
+      keyType: EC384
+      httpChallenge:
+        entryPoint: web
