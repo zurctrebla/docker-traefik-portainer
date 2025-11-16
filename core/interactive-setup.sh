@@ -54,6 +54,10 @@ HTTPS_PORT=${HTTPS_PORT:-443}
 read -r -p "Porta interna Portainer [9000]: " PORTAINER_PORT
 PORTAINER_PORT=${PORTAINER_PORT:-9000}
 
+# --- gerar BASIC_AUTH_USERS -----------------------------------------------
+info "gerando hash de autenticação..."
+BASIC_AUTH_HASH=$(htpasswd -nbB "${AUTH_USER}" "${AUTH_PASS}")
+
 # --- gerar .env -----------------------------------------------------------
 info "gerando .env ..."
 [[ -f .env ]] && cp -f .env ".env.bak.$(date +%Y%m%d%H%M%S)"
@@ -73,8 +77,7 @@ PORTAINER_DOMAIN=${PORTAINER_DOMAIN}
 
 LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
 
-# htpasswd via usersFile
-BASIC_AUTH_FILE=/configurations/.htpasswd
+BASIC_AUTH_USERS=${BASIC_AUTH_HASH}
 
 TZ=${TZ}
 EOF
@@ -82,20 +85,16 @@ info ".env criado em $(pwd)/.env"
 
 # --- preparar pastas/arquivos --------------------------------------------
 info "preparando pastas ..."
-mkdir -p traefik-data/configurations
+mkdir -p traefik-data
 
 info "criando/ajustando acme.json ..."
 touch traefik-data/acme.json
 chmod 600 traefik-data/acme.json
-chown root:root traefik-data/acme.json || true
+chown $USER:$USER traefik-data/acme.json || true
 
 # --- criar rede docker ----------------------------------------------------
 info "criando rede '${DOCKER_NETWORK}' (se não existir) ..."
 docker network create "${DOCKER_NETWORK}" >/dev/null 2>&1 || true
-
-# --- gerar .htpasswd ------------------------------------------------------
-info "gerando traefik-data/configurations/.htpasswd ..."
-htpasswd -nbB "${AUTH_USER}" "${AUTH_PASS}" > traefik-data/configurations/.htpasswd
 
 # --- subir stack ----------------------------------------------------------
 info "subindo containers ..."
