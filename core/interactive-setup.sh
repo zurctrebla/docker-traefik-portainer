@@ -19,11 +19,16 @@ fi
 cd "$(dirname "$0")"
 
 # --- perguntas ------------------------------------------------------------
-read -r -p "Domínio do Traefik [traefik.seu-dominio.com]: " TRAEFIK_DOMAIN
-TRAEFIK_DOMAIN=${TRAEFIK_DOMAIN:-traefik.seu-dominio.com}
+read -r -p "Domínio base [seu-dominio.com]: " DOMAIN
+DOMAIN=${DOMAIN:-seu-dominio.com}
 
-read -r -p "Domínio do Portainer [portainer.seu-dominio.com]: " PORTAINER_DOMAIN
-PORTAINER_DOMAIN=${PORTAINER_DOMAIN:-portainer.seu-dominio.com}
+TRAEFIK_DOMAIN="traefik.${DOMAIN}"
+PORTAINER_DOMAIN="portainer.${DOMAIN}"
+
+info "Domínios configurados:"
+echo "  → Traefik:   ${TRAEFIK_DOMAIN}"
+echo "  → Portainer: ${PORTAINER_DOMAIN}"
+echo
 
 read -r -p "E-mail para Let's Encrypt (obrigatório): " LETSENCRYPT_EMAIL
 [[ -z "${LETSENCRYPT_EMAIL}" ]] && abort "e-mail é obrigatório."
@@ -56,7 +61,7 @@ PORTAINER_PORT=${PORTAINER_PORT:-9000}
 
 # --- gerar BASIC_AUTH_USERS -----------------------------------------------
 info "gerando hash de autenticação..."
-BASIC_AUTH_HASH=$(htpasswd -nbB "${AUTH_USER}" "${AUTH_PASS}")
+BASIC_AUTH_HASH=$(htpasswd -nbB "${AUTH_USER}" "${AUTH_PASS}" | sed 's/\$/\$\$/g')
 
 # --- gerar .env -----------------------------------------------------------
 info "gerando .env ..."
